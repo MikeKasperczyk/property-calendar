@@ -3,6 +3,6 @@ export interface IEvent {
 	propertyId: string;
   tenantId: string;
   workerId: string;
-  start: Date;
-  end: Date;
+  start: string;
+  end: string;
 }

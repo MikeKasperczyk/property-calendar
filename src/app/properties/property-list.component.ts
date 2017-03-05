@@ -19,12 +19,10 @@ export class PropertyListComponent implements OnInit {
 	address: string;
 
 	ngOnInit() {
-		console.log(this.properties);
 		this._propertyService.getProperties().subscribe(properties => this.properties = properties);
 	}
 
 	addProperty() {
-    console.log("address", this.address);
     var property: IProperty = {
       id : "",
       address : this.address

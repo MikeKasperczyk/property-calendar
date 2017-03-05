@@ -14,5 +14,9 @@ export const colors: any = {
   yellow: {
     primary: '#e3bc08',
     secondary: '#FDF1BA'
+  },
+  green: {
+    primary: '#00cc00',
+    secondary: '#99ff99'
   }
 };

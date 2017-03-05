@@ -1,6 +1,7 @@
-import { Component, OnInit, ViewChild, TemplateRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs/Subject';
+import { Observable } from 'rxjs/Observable';
 import { startOfDay, endOfDay, isSameDay, isSameMonth, addDays, addMonths, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { CalendarEvent, CalendarEventTimesChangedEvent, CalendarMonthViewDay, CalendarEventAction } from 'angular-calendar';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -10,8 +11,16 @@ import 'rxjs/add/operator/catch';
 import { AuthService } from '../authn/auth.service';
 import { PropertyService } from './property.service';
 import { IProperty } from './property';
-import { WorkdayService } from '../events/workday.service';
-import { IWorkday } from '../events/workday';
+import { WorkdayService } from '../workers/workday.service';
+import { IWorkday } from '../workers/workday';
+import { EventService } from '../events/event.service';
+import { IEvent } from '../events/event';
+import { TenantService } from '../tenants/tenant.service';
+import { ITenant } from '../tenants/tenant';
+
+interface TenantEvent extends CalendarEvent {
+  tenant: IEvent;
+}
 
 interface WorkdayEvent extends CalendarEvent {
   workday: IWorkday;
@@ -27,11 +36,13 @@ export class PropertyCalendarComponent implements OnInit {
   ];
 
   constructor(
-    private _route: ActivatedRoute,
-    private _propertyService: PropertyService,
-    private _authService: AuthService,
+    private route: ActivatedRoute,
     private modal: NgbModal,
-    private workdayService: WorkdayService) {
+    private authService: AuthService,
+    private propertyService: PropertyService,
+    private workdayService: WorkdayService,
+    private eventService: EventService,
+    private tenantService: TenantService) {
     this.dayModifier = function(day: CalendarMonthViewDay): void {
       if (!this.dateIsValid(day.date)) {
         day.cssClass = 'cal-disabled';
@@ -47,7 +58,7 @@ export class PropertyCalendarComponent implements OnInit {
   start: any = "09:00";
   end: any = "17:00";
 
-  actions: CalendarEventAction[] = [
+  workdayActions: CalendarEventAction[] = [
     {
       label: '<i class="fa fa-fw fa-times"></i>',
       onClick: ({event}: {event: WorkdayEvent}): void => {
@@ -66,6 +77,7 @@ export class PropertyCalendarComponent implements OnInit {
 
   property: IProperty;
   events: CalendarEvent[] = [];
+  tenants: ITenant[];
 
   prevBtnDisabled: boolean = false;
   nextBtnDisabled: boolean = false;
@@ -82,15 +94,29 @@ export class PropertyCalendarComponent implements OnInit {
       });
     }
 
-    // add workdays
-    this._route.params.subscribe(params => {
+    this.route.params.subscribe(params => {
       let propertyId = params['id'];
-      this._propertyService.getProperty(propertyId).subscribe(property => this.property = property);
+      this.propertyService.getProperty(propertyId).subscribe(property => this.property = property);
+      this.tenantService.getAllTenants().subscribe(tenants => this.tenants = tenants);
+
+      // add workdays
       this.workdayService.findAll().subscribe(workdays => {
-        workdays.filter(workday => workday.propertyId === propertyId).forEach(workday => this.events.push(this.createEvent(workday)));
-      })
+        workdays.filter(workday => workday.propertyId === propertyId).forEach(workday => {
+          this.events.push(this.createWorkdayEvent(workday));
+          this.refresh.next();
+        });
+      });
+
+      // add tenant events
+      this.eventService.findAllEvents().subscribe(events => {
+        events.filter(event => event.propertyId === propertyId).forEach(event => {
+          this.events.push(this.createTenantEvent(event));
+          this.refresh.next();
+        })
+      });
     });
-    this.refresh.next();
+
+
   }
 
   addEvent() {
@@ -106,7 +132,7 @@ export class PropertyCalendarComponent implements OnInit {
     var workday: IWorkday = {
       id : "",
       propertyId : this.property.id,
-      workerId : this._authService.getUserName(),
+      workerId : this.authService.getUserName(),
       start : startDateTime.toJSON(),
       end : endDateTime.toJSON(),
     }
@@ -114,7 +140,7 @@ export class PropertyCalendarComponent implements OnInit {
     this.workdayService.save(workday);
 
     // if successfull add it to calendar
-    this.events.push(this.createEvent(workday));
+    this.events.push(this.createWorkdayEvent(workday));
     this.refresh.next();
 
     // close modal
@@ -180,14 +206,26 @@ export class PropertyCalendarComponent implements OnInit {
     }
   }
 
-  createEvent(workday : IWorkday) : WorkdayEvent {
+  createWorkdayEvent(workday : IWorkday) : WorkdayEvent {
     return {
-      title: workday.start.substring(11, 16) + " - " + workday.end.substring(11, 16) + " (" + workday.workerId + ")",
+      title: workday.start.substring(11, 16) + "-" + workday.end.substring(11, 16) + " (" + workday.workerId + ")",
       start: new Date(workday.start),
       end: new Date(workday.end),
       color: colors.blue,
-      actions: this.actions,
+      actions: this.workdayActions,
       workday: workday,
+    };
+	}
+
+  createTenantEvent(event : IEvent) : TenantEvent {
+    var tenant = this.tenants.find(t => t.id === event.tenantId);
+    return {
+      title: event.start.substring(11, 16) + "-" + event.end.substring(11, 16) + " (" + tenant.firstName + " " + tenant.lastName + ")",
+      start: new Date(event.start),
+      end: new Date(event.end),
+      color: colors.green,
+      actions: [],
+      tenant: event,
     };
 	}
 }

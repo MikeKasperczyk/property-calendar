@@ -1,13 +1,11 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs/Subject';
 import { Observable } from 'rxjs/Observable';
 import { isSameDay, isSameMonth, addMinutes, addDays, addWeeks, addMonths, subWeeks, startOfWeek, endOfWeek } from 'date-fns';
 import { CalendarEvent, CalendarEventTimesChangedEvent, CalendarMonthViewDay, CalendarEventAction } from 'angular-calendar';
 import { colors } from '../const/colors';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import 'rxjs/add/operator/mergeMap';
 
+import { AuthService } from '../authn/auth.service';
 import { TenantService } from '../tenants/tenant.service';
 import { ITenant } from '../tenants/tenant';
 import { WorkdayService } from '../workers/workday.service';
@@ -22,22 +20,20 @@ interface WorkerEvent extends CalendarEvent {
 }
 
 @Component({
-	templateUrl: './tenant-calendar.component.html',
+	templateUrl: './worker-calendar.component.html',
 })
-export class TenantCalendarComponent implements OnInit {
+export class WorkerCalendarComponent implements OnInit {
 
 	monthNames = ["January", "February", "March", "April", "May", "June",
 		"July", "August", "September", "October", "November", "December"
 	];
 
 	constructor(
-		private route: ActivatedRoute,
+		private authService: AuthService,
 		private tenantService: TenantService,
 	  private workdayService: WorkdayService,
 		private eventService: EventService,
-		private propertyService: PropertyService,
-	  private modal: NgbModal,
-	  private router: Router) {
+		private propertyService: PropertyService) {
 			this.dayModifier = function(day: CalendarMonthViewDay): void {
 	      if (!this.dateIsValid(day.date)) {
 	        day.cssClass = 'cal-disabled';
@@ -46,76 +42,66 @@ export class TenantCalendarComponent implements OnInit {
 	    this.dateOrViewChanged();
 		}
 
-	modalRef: NgbModalRef;
-		  // tenant link modal
-	@ViewChild('content') modalContent: TemplateRef<any>;
-
 	refresh: Subject<any> = new Subject();
 
   viewDate: Date = new Date();
-	minDate: Date = new Date();
+	minDate: Date = addDays(new Date(), 1);
 	maxDate: Date = addMonths(new Date(), 3);
 	dayModifier: Function;
 
-	tenant: ITenant;
-	property: IProperty;
-  events: Observable<WorkerEvent[]>;
-	selectedEvent: WorkerEvent;
-  tenantEvents: IEvent[];
+  events: CalendarEvent[] = [];
+  tenants: ITenant[] = [];
+  properties: IProperty[] = [];
 
 	prevBtnDisabled: boolean = false;
   nextBtnDisabled: boolean = false;
 
 	ngOnInit() {
-		this.route.params.subscribe(params => {
-			let tenantId = "" + params['id'];
-			this.tenantService.findTenantById(tenantId).subscribe(t => {
-				this.tenant = t;
-				this.propertyService.getProperty(t.propertyId).subscribe(p => this.property = p);
-			});
-      this.eventService.findAllEvents().subscribe(events => this.tenantEvents = events);
-			this.events = this.workdayService.findAll().map(workdays => {
-				var events = [];
-				workdays.filter(workday => workday.propertyId === this.tenant.propertyId)
-          .forEach(workday => {
-					var date;
-					for(date = new Date(workday.start); date < new Date(workday.end); date = addMinutes(date, 30)) {
-            var eventDate = date.toJSON();
-            if(this.tenantEvents.find(e => e.start === eventDate) != null) {
-              console.log("event skipped: " + eventDate);
-              continue;
-            }
-						events.push({
-	            title: date.toJSON().substring(11, 16) + "-" + addMinutes(date, 30).toJSON().substring(11, 16),
-	            start: date,
-	            end: addMinutes(date, 30),
-	            color: colors.blue,
-	            actions: [],
-							workerId: workday.workerId,
-	          });
-					}
-				});
-				return events;
-      })
-		});
+    var isAdmin = this.authService.hasRole('AdminRole');
+    this.tenantService.getAllTenants().subscribe(tenants => this.tenants = tenants);
+    this.propertyService.getProperties().subscribe(props => this.properties = props);
+    // if worker then find all worker workdays and if admin find all workers workdays
+    var workerId = this.authService.getUserName();
+    this.workdayService.findAll().subscribe(events => {
+      events.filter(e => isAdmin || e.workerId === workerId)
+        .forEach(e => {
+          this.events.push(this.createWorkdayEvent(e, isAdmin));
+          this.refresh.next();
+        })
+    });
+    // find all tenants events and apply to same calendar
+    this.eventService.findAllEvents().subscribe(events => {
+      events.filter(e => isAdmin || e.workerId === workerId)
+        .forEach(e => {
+          this.events.push(this.createTenantEvent(e, isAdmin));
+          this.refresh.next();
+        })
+    });
 	}
 
-  eventClicked({event}: {event: WorkerEvent}): void {
-    console.log('Event clicked', event);
-		this.selectedEvent = event;
-		this.modalRef = this.modal.open(this.modalContent);
-  }
+  createWorkdayEvent(workday : IWorkday, showWorker: boolean) : CalendarEvent {
+    var property = this.properties.find(p => p.id === workday.propertyId);
+    var time = workday.start.substring(11, 16) + "-" + workday.end.substring(11, 16);
+    return {
+      title: time + (showWorker?" " + workday.workerId:"") + " " + property.address,
+      start: new Date(workday.start),
+      end: new Date(workday.end),
+      color: colors.blue,
+      actions: [],
+    };
+	}
 
-  confirm(): void {
-		this.modalRef.close();
-    this.eventService.saveEvent({
-			id: "",
-			propertyId: this.property.id,
-			tenantId: this.tenant.id,
-			workerId: this.selectedEvent.workerId,
-			start: this.selectedEvent.start.toJSON(),
-			end: this.selectedEvent.end.toJSON(),
-		}).subscribe(eventId => this.router.navigate(["/tenant-event-confirmation", eventId]));
+  createTenantEvent(event : IEvent, showWorker: boolean) : CalendarEvent {
+    var tenant = this.tenants.find(t => t.id === event.tenantId);
+    var property = this.properties.find(p => p.id === event.propertyId);
+    var time = event.start.substring(11, 16) + "-" + event.end.substring(11, 16);
+    return {
+      title: time + (showWorker?" " + event.workerId:"") + " " + property.address + ": " + tenant.firstName + " " + tenant.lastName,
+      start: new Date(event.start),
+      end: new Date(event.end),
+      color: colors.green,
+      actions: [],
+    };
 	}
 
 	increment(): void {

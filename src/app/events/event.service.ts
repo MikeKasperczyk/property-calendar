@@ -14,7 +14,7 @@ export class EventService {
 
 	constructor(private http: Http, private config: ConfigService) {}
 
-	getEvents(): Observable<IEvent[]> {
+	findAllEvents(): Observable<IEvent[]> {
 		var _url: string = this.config.getServiceUrl() + this.url;
 	  return this.http.get(_url).map((response: Response) => {
 			var body = response.json()
@@ -24,11 +24,18 @@ export class EventService {
 		});
 	}
 
-	saveEvent(event : IEvent) {
+	findEventById(id: string): Observable<IEvent> {
+		return this.findAllEvents()
+			.map((events: IEvent[]) => events.find(e => e.id == id));
+	}
+
+	saveEvent(event : IEvent): Observable<string> {
+		console.log(event);
 		let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
 
 		var _url: string = this.config.getServiceUrl() + this.url;
-		this.http.post(_url, event, options);
+		var id = null;
+		return this.http.post(_url, event, options).map(data => data.json().id);
 	}
 }
