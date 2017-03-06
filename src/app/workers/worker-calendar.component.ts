@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { isSameDay, isSameMonth, addMinutes, addDays, addWeeks, addMonths, subWeeks, startOfWeek, endOfWeek } from 'date-fns';
 import { CalendarEvent, CalendarEventTimesChangedEvent, CalendarMonthViewDay, CalendarEventAction } from 'angular-calendar';
 import { colors } from '../const/colors';
+import 'rxjs/add/operator/zip';
 
 import { AuthService } from '../authn/auth.service';
 import { TenantService } from '../tenants/tenant.service';
@@ -58,24 +59,26 @@ export class WorkerCalendarComponent implements OnInit {
 
 	ngOnInit() {
     var isAdmin = this.authService.hasRole('AdminRole');
-    this.tenantService.getAllTenants().subscribe(tenants => this.tenants = tenants);
-    this.propertyService.getProperties().subscribe(props => this.properties = props);
-    // if worker then find all worker workdays and if admin find all workers workdays
-    var workerId = this.authService.getUserName();
-    this.workdayService.findAll().subscribe(events => {
-      events.filter(e => isAdmin || e.workerId === workerId)
-        .forEach(e => {
-          this.events.push(this.createWorkdayEvent(e, isAdmin));
-          this.refresh.next();
-        })
-    });
-    // find all tenants events and apply to same calendar
-    this.eventService.findAllEvents().subscribe(events => {
-      events.filter(e => isAdmin || e.workerId === workerId)
-        .forEach(e => {
-          this.events.push(this.createTenantEvent(e, isAdmin));
-          this.refresh.next();
-        })
+    var tenantObservable = this.tenantService.getAllTenants().map(tenants => this.tenants = tenants);
+    var propertyObservable = this.propertyService.getProperties().map(props => this.properties = props);
+    tenantObservable.zip(propertyObservable).subscribe(() => {
+        // if worker then find all worker workdays and if admin find all workers workdays
+        var workerId = this.authService.getUserName();
+        this.workdayService.findAll().subscribe(events => {
+          events.filter(e => isAdmin || e.workerId === workerId)
+            .forEach(e => {
+              this.events.push(this.createWorkdayEvent(e, isAdmin));
+              this.refresh.next();
+            })
+        });
+        // find all tenants events and apply to same calendar
+        this.eventService.findAllEvents().subscribe(events => {
+          events.filter(e => isAdmin || e.workerId === workerId)
+            .forEach(e => {
+              this.events.push(this.createTenantEvent(e, isAdmin));
+              this.refresh.next();
+            })
+        });
     });
 	}
 
