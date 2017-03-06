@@ -2,7 +2,7 @@
 		<div class="card-block">
 			<div class="row">
 	      <div class="col-md-5">
-					<h4 class="card-title">Tenant: {{tenant.firstName}} {{tenant.lastName}}</h4>
+					<h4 class="card-title">Mieter: {{tenant.firstName}} {{tenant.lastName}}</h4>
 	      </div>
 	      <div class="col-md-3">
 	        <h5>{{ monthNames[viewDate.getMonth()] }}</h5>
@@ -35,7 +35,7 @@
 	    <h4 class="modal-title">Bestätigung</h4>
 	  </div>
 		<div class="modal-body">
-      <p>Der Temin wurde fix fur Sie gebucht, </p>
+      <p>Der Temin wurde fix für Sie gebucht.</p>
     </div>
 	  <div class="modal-footer">
 			<button type="button" class="btn btn-primary" (click)="confirm()">Ja</button>
