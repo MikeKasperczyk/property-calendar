@@ -10,19 +10,27 @@
       <div class="col-md-4">
         <div class="btn-group float-right">
           <button class="btn btn-primary" (click)="decrement()" [disabled]="prevBtnDisabled">
-            Previous
+            Vorherige
           </button>
           <button class="btn btn-secondary" (click)="today()">
-            Today
+            Heute
           </button>
           <button class="btn btn-primary" (click)="increment()" [disabled]="nextBtnDisabled">
-            Next
+            Nächste
           </button>
         </div>
       </div>
     </div>
 
-    <mwl-calendar-month-view [viewDate]="viewDate" [events]="events" [refresh]="refresh" [activeDayIsOpen]="activeDayIsOpen" [dayModifier]="dayModifier" (eventClicked)="eventClicked($event)" (dayClicked)="dayClicked($event.day)">
+    <mwl-calendar-month-view
+      [viewDate]="viewDate"
+      [events]="events"
+      [refresh]="refresh"
+      [activeDayIsOpen]="activeDayIsOpen"
+      [dayModifier]="dayModifier"
+      [locale]="locale"
+      (eventClicked)="eventClicked($event)"
+      (dayClicked)="dayClicked($event.day)">
     </mwl-calendar-month-view>
   </div>
 </div>

@@ -11,13 +11,13 @@
 	      <div class="col-md-4">
 	        <div class="btn-group float-right">
 	          <button class="btn btn-primary" (click)="decrement()" [disabled]="prevBtnDisabled">
-	            Previous
+	            Vorherige
 	          </button>
 	          <button class="btn btn-secondary" (click)="today()">
-	            Today
+	            Heute
 	          </button>
 	          <button class="btn btn-primary" (click)="increment()" [disabled]="nextBtnDisabled">
-	            Next
+	            Nächste
 	          </button>
 	        </div>
 	      </div>
@@ -25,6 +25,7 @@
 			<mwl-calendar-week-view
 			  [viewDate]="viewDate"
 			  [events]="(events | async) || []"
+				[locale]="locale"
 				(eventClicked)="eventClicked($event)">
 			</mwl-calendar-week-view>
 		</div>

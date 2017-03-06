@@ -5,6 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { isSameDay, isSameMonth, addMinutes, addDays, addWeeks, addMonths, subWeeks, startOfWeek, endOfWeek } from 'date-fns';
 import { CalendarEvent, CalendarEventTimesChangedEvent, CalendarMonthViewDay, CalendarEventAction } from 'angular-calendar';
 import { colors } from '../const/colors';
+import { months } from '../const/months';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import 'rxjs/add/operator/mergeMap';
 
@@ -26,9 +27,7 @@ interface WorkerEvent extends CalendarEvent {
 })
 export class TenantCalendarComponent implements OnInit {
 
-	monthNames = ["January", "February", "March", "April", "May", "June",
-		"July", "August", "September", "October", "November", "December"
-	];
+  monthNames = months;
 
 	constructor(
 		private route: ActivatedRoute,
@@ -56,6 +55,7 @@ export class TenantCalendarComponent implements OnInit {
 	minDate: Date = new Date();
 	maxDate: Date = addMonths(new Date(), 3);
 	dayModifier: Function;
+  locale: string = "de";
 
 	tenant: ITenant;
 	property: IProperty;

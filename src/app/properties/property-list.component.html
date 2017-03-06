@@ -9,11 +9,22 @@
       </div>
     </div>
     <table class="table table-hover" >
+      <thead>
+        <th>Adresse</th>
+        <th>PLZ</th>
+        <th>Ort</th>
+        <th>Land</th>
+        <th>Kalender</th>
+        <th>Mieter</th>
+      </thead>
       <tbody *ngIf="properties?.length > 0">
         <tr *ngFor='let property of properties' >
           <td><a>{{property.address}}</a></td>
-          <td><button [routerLink]="['/property-calendar', property.id]" type="link" class="btn btn-link">Kalender</button>
-          <td><button [routerLink]="['/property-tenants', property.id]" type="link" class="btn btn-link" [disabled]="!auth.hasRole('AdminRole')">Mieter</button>
+          <td>{{property.zipCode}}</td>
+          <td>{{property.city}}</td>
+          <td>{{property.country}}</td>
+          <td><button [routerLink]="['/property-calendar', property.id]" type="link" class="btn btn-link" style="padding-left: 0px">Kalender</button>
+          <td><button [routerLink]="['/property-tenants', property.id]" type="link" class="btn btn-link" style="padding-left: 0px" [disabled]="!auth.hasRole('AdminRole')">Mieter</button>
         </tr>
       </tbody>
     </table>
@@ -28,7 +39,25 @@
       <div class="form-group row">
         <label for="address" class="col-2 col-form-label">Adresse</label>
           <div class="col-10">
-          <input id="address" [(ngModel)]="address" class="form-control" type="text">
+          <input id="address" [(ngModel)]="property.address" class="form-control" type="text">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="zipCode" class="col-2 col-form-label">PLZ</label>
+          <div class="col-10">
+          <input id="zipCode" [(ngModel)]="property.zipCode" class="form-control" type="text">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="city" class="col-2 col-form-label">Ort</label>
+          <div class="col-10">
+          <input id="city" [(ngModel)]="property.city" class="form-control" type="text">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="country" class="col-2 col-form-label">Land</label>
+          <div class="col-10">
+          <input id="country" [(ngModel)]="property.country" class="form-control" type="text">
         </div>
       </div>
   </div>

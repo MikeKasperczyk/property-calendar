@@ -16,27 +16,24 @@ export class PropertyListComponent implements OnInit {
 	// modal and properties
   @ViewChild('content') modalContent: TemplateRef<any>;
   modalRef: NgbModalRef;
-	address: string;
+	property: IProperty;
 
 	ngOnInit() {
 		this._propertyService.getProperties().subscribe(properties => this.properties = properties);
 	}
 
 	addProperty() {
-    var property: IProperty = {
-      id : "",
-      address : this.address
-    }
     // save event in database
-    this._propertyService.save(property);
+    this._propertyService.save(this.property);
 
     // if successfull add it to the list
-    this.properties.push(property);
+    this.properties.push(this.property);
 
     this.modalRef.close();
   }
 
 	open(content) {
+		this.property = <IProperty>{};
     this.modalRef = this.modal.open(content);
   }
 }

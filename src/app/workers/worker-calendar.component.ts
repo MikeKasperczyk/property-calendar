@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { isSameDay, isSameMonth, addMinutes, addDays, addWeeks, addMonths, subWeeks, startOfWeek, endOfWeek } from 'date-fns';
 import { CalendarEvent, CalendarEventTimesChangedEvent, CalendarMonthViewDay, CalendarEventAction } from 'angular-calendar';
 import { colors } from '../const/colors';
+import { months } from '../const/months';
 import 'rxjs/add/operator/zip';
 
 import { AuthService } from '../authn/auth.service';
@@ -25,9 +26,7 @@ interface WorkerEvent extends CalendarEvent {
 })
 export class WorkerCalendarComponent implements OnInit {
 
-	monthNames = ["January", "February", "March", "April", "May", "June",
-		"July", "August", "September", "October", "November", "December"
-	];
+	monthNames = months;
 
 	constructor(
 		private authService: AuthService,
@@ -49,6 +48,7 @@ export class WorkerCalendarComponent implements OnInit {
 	minDate: Date = addDays(new Date(), 1);
 	maxDate: Date = addMonths(new Date(), 3);
 	dayModifier: Function;
+  locale: string = "de";
 
   events: CalendarEvent[] = [];
   tenants: ITenant[] = [];

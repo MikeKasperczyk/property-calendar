@@ -6,6 +6,7 @@ import { startOfDay, endOfDay, isSameDay, isSameMonth, addDays, addMonths, subMo
 import { CalendarEvent, CalendarEventTimesChangedEvent, CalendarMonthViewDay, CalendarEventAction } from 'angular-calendar';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { colors } from '../const/colors';
+import { months } from '../const/months';
 import 'rxjs/add/operator/catch';
 
 import { AuthService } from '../authn/auth.service';
@@ -31,9 +32,7 @@ interface WorkdayEvent extends CalendarEvent {
 })
 export class PropertyCalendarComponent implements OnInit {
 
-  monthNames = ["January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
+  monthNames = months;
 
   constructor(
     private route: ActivatedRoute,
@@ -74,6 +73,7 @@ export class PropertyCalendarComponent implements OnInit {
   minDate: Date = new Date();
   maxDate: Date = addMonths(new Date(), 3);
   dayModifier: Function;
+  locale: string = "de";
 
   property: IProperty;
   events: CalendarEvent[] = [];

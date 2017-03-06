@@ -14,8 +14,8 @@
         <th>Name</th>
         <th>Gebäude</th>
         <th>Einheit</th>
-        <th>email</th>
-        <th>calendar</th>
+        <th>E-Mail</th>
+        <th>Kalender</th>
       </thead>
       <tbody >
         <tr *ngFor='let tenant of tenants'>
@@ -42,7 +42,7 @@
       <div class="input-group col-12">
         <input class="form-control" type="text" [(ngModel)]="selectedTenantUrl" readonly="true">
         <span class="input-group-btn">
-          <button class="btn btn-secondary" [class.btn-success]= "copied" type="button" ngxClipboard [cbContent]="selectedTenantUrl" (cbOnSuccess)="copied = true" title="copy to clipboard">
+          <button class="btn btn-secondary" [class.btn-success]= "copied" type="button" ngxClipboard [cbContent]="selectedTenantUrl" (cbOnSuccess)="copied = true" title="kopiert in die Zwischenablage">
             <i class="fa fa-clipboard" aria-hidden="true"></i>
           </button>
         </span>
@@ -50,7 +50,7 @@
     </div>
   </div>
   <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+      <button type="button" class="btn btn-secondary" (click)="close()">Schließen</button>
   </div>
 </template>
 
@@ -60,38 +60,38 @@
   </div>
   <div class="modal-body">
     <div class="form-group row">
-      <label for="firstName" class="col-3 col-form-label">first name</label>
+      <label for="firstName" class="col-3 col-form-label">Vorname</label>
         <div class="col-9">
         <input id="firstName" [(ngModel)]="selectedTenant.firstName" class="form-control" type="text">
       </div>
     </div>
     <div class="form-group row">
-      <label for="lastName" class="col-3 col-form-label">last name</label>
+      <label for="lastName" class="col-3 col-form-label">Zuname</label>
         <div class="col-9">
         <input id="lastName" [(ngModel)]="selectedTenant.lastName" class="form-control" type="text">
       </div>
     </div>
     <div class="form-group row">
-      <label for="doorNum" class="col-3 col-form-label">building</label>
+      <label for="doorNum" class="col-3 col-form-label">Gebäude</label>
         <div class="col-9">
         <input id="doorNum" [(ngModel)]="selectedTenant.building" class="form-control" type="text">
       </div>
     </div>
     <div class="form-group row">
-      <label for="doorNum" class="col-3 col-form-label">flat</label>
+      <label for="doorNum" class="col-3 col-form-label">Einheit</label>
         <div class="col-9">
         <input id="doorNum" [(ngModel)]="selectedTenant.flat" class="form-control" type="text">
       </div>
     </div>
     <div class="form-group row">
-      <label for="email" class="col-3 col-form-label">email</label>
+      <label for="email" class="col-3 col-form-label">E-Mail</label>
         <div class="col-9">
         <input id="email" [(ngModel)]="selectedTenant.email" class="form-control" type="text">
       </div>
     </div>
   </div>
   <div class="modal-footer">
-      <button type="button" class="btn btn-primary" (click)="saveTenant()">Save</button>
-      <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+      <button type="button" class="btn btn-primary" (click)="saveTenant()">Hinzufügen</button>
+      <button type="button" class="btn btn-secondary" (click)="close()">Abbrechen</button>
   </div>
 </template>
