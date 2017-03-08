@@ -25,7 +25,7 @@ export class TenantEventConfirmationComponent implements OnInit {
   ngOnInit() {
     this.route.params.subscribe(params => {
       var eventId = "" + params['id'];
-      this.eventService.findEventById(eventId).subscribe(t => {
+      this.eventService.findById(eventId).subscribe(t => {
         this.event = t;
       });
 		});

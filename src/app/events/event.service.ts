@@ -24,12 +24,12 @@ export class EventService {
 		});
 	}
 
-	findEventById(id: string): Observable<IEvent> {
+	findById(id: string): Observable<IEvent> {
 		return this.findAllEvents()
 			.map((events: IEvent[]) => events.find(e => e.id == id));
 	}
 
-	saveEvent(event : IEvent): Observable<string> {
+	save(event : IEvent): Observable<string> {
 		console.log(event);
 		let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
@@ -37,5 +37,14 @@ export class EventService {
 		var _url: string = this.config.getServiceUrl() + this.url;
 		var id = null;
 		return this.http.post(_url, event, options).map(data => data.json().id);
+	}
+
+	delete(event : IEvent) {
+		let headers = new Headers({ 'Content-Type': 'application/json' });
+    let options = new RequestOptions({ headers: headers });
+
+		var _url: string = this.config.getServiceUrl() + this.url + "/" + event.id;
+		console.log("delete", _url, event, options);
+		this.http.delete(_url, options).subscribe(data => { console.log(data) });
 	}
 }

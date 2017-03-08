@@ -43,4 +43,13 @@ export class TenantService {
 		console.log("post", _url, tenant, options);
 		this.http.post(_url, tenant, options).subscribe(data => { console.log(data) });
 	}
+
+	delete(tenant : ITenant) {
+		let headers = new Headers({ 'Content-Type': 'application/json' });
+    let options = new RequestOptions({ headers: headers });
+
+		var _url: string = this.config.getServiceUrl() + this.url + "/" + tenant.id;
+		console.log("delete", _url, tenant, options);
+		this.http.delete(_url, options).subscribe(data => { console.log(data) });
+	}
 }

@@ -108,7 +108,7 @@ export class TenantCalendarComponent implements OnInit {
 
   confirm(): void {
 		this.modalRef.close();
-    this.eventService.saveEvent({
+    this.eventService.save({
 			id: "",
 			propertyId: this.property.id,
 			tenantId: this.tenant.id,

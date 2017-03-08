@@ -66,6 +66,15 @@ export class PropertyCalendarComponent implements OnInit {
     }
   ];
 
+  tenantActions: CalendarEventAction[] = [
+    {
+      label: '<i class="fa fa-fw fa-times"></i>',
+      onClick: ({event}: {event: TenantEvent}): void => {
+        this.deleteTenantEvent(event);
+      }
+    }
+  ];
+
   refresh: Subject<any> = new Subject();
 
   activeDayIsOpen: boolean = false;
@@ -96,23 +105,25 @@ export class PropertyCalendarComponent implements OnInit {
 
     this.route.params.subscribe(params => {
       let propertyId = params['id'];
-      this.propertyService.getProperty(propertyId).subscribe(property => this.property = property);
-      this.tenantService.getAllTenants().subscribe(tenants => this.tenants = tenants);
+      var propertyObservable = this.propertyService.getProperty(propertyId).map(property => this.property = property);
+      var tenantsObservable = this.tenantService.getAllTenants().map(tenants => this.tenants = tenants);
 
-      // add workdays
-      this.workdayService.findAll().subscribe(workdays => {
-        workdays.filter(workday => workday.propertyId === propertyId).forEach(workday => {
-          this.events.push(this.createWorkdayEvent(workday));
-          this.refresh.next();
+      propertyObservable.zip(tenantsObservable).subscribe(() => {
+        // add workdays
+        this.workdayService.findAll().subscribe(workdays => {
+          workdays.filter(workday => workday.propertyId === propertyId).forEach(workday => {
+            this.events.push(this.createWorkdayEvent(workday));
+            this.refresh.next();
+          });
         });
-      });
 
-      // add tenant events
-      this.eventService.findAllEvents().subscribe(events => {
-        events.filter(event => event.propertyId === propertyId).forEach(event => {
-          this.events.push(this.createTenantEvent(event));
-          this.refresh.next();
-        })
+        // add tenant events
+        this.eventService.findAllEvents().subscribe(events => {
+          events.filter(event => event.propertyId === propertyId).forEach(event => {
+            this.events.push(this.createTenantEvent(event));
+            this.refresh.next();
+          })
+        });
       });
     });
 
@@ -150,6 +161,11 @@ export class PropertyCalendarComponent implements OnInit {
   deleteEvent(event: WorkdayEvent): void {
       this.workdayService.delete(event.workday);
       this.events = this.events.filter(e => e !== event);
+  }
+
+  deleteTenantEvent(event: TenantEvent): void {
+    this.eventService.delete(event.tenant);
+    this.events = this.events.filter(e => e !== event);
   }
 
   open(content) {
@@ -224,7 +240,7 @@ export class PropertyCalendarComponent implements OnInit {
       start: new Date(event.start),
       end: new Date(event.end),
       color: colors.green,
-      actions: [],
+      actions: this.tenantActions,
       tenant: event,
     };
 	}
