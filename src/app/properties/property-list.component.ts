@@ -22,18 +22,24 @@ export class PropertyListComponent implements OnInit {
 		this._propertyService.getProperties().subscribe(properties => this.properties = properties);
 	}
 
-	addProperty() {
+	saveProperty() {
+		var newProperty = !this.property.id;
     // save event in database
     this._propertyService.save(this.property);
-
     // if successfull add it to the list
-    this.properties.push(this.property);
-
+		if(newProperty) {
+    	this.properties.push(this.property);
+		}
     this.modalRef.close();
   }
 
-	open(content) {
-		this.property = <IProperty>{};
-    this.modalRef = this.modal.open(content);
+	open(content: any, propertyId: string) {
+		console.log("called: " + propertyId);
+		if(!propertyId) {
+			this.property = <IProperty>{};
+		} else {
+			this.property = this.properties.find(p => p.id === propertyId);
+		}
+		this.modalRef = this.modal.open(content);
   }
 }

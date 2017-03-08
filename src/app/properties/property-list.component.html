@@ -19,7 +19,7 @@
       </thead>
       <tbody *ngIf="properties?.length > 0">
         <tr *ngFor='let property of properties' >
-          <td><a>{{property.address}}</a></td>
+          <td><button class="btn-link" (click)="open(content, property.id)">{{property.address}}</button></td>
           <td>{{property.zipCode}}</td>
           <td>{{property.city}}</td>
           <td>{{property.country}}</td>
@@ -62,7 +62,7 @@
       </div>
   </div>
   <div class="modal-footer">
-      <button type="button" class="btn btn-primary" (click)="addProperty()">Hinzufügen</button>
+      <button type="button" class="btn btn-primary" (click)="saveProperty()">Hinzufügen</button>
       <button type="button" class="btn btn-secondary" (click)="close()">Abbrechen</button>
   </div>
 </template>
