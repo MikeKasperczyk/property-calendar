@@ -14,7 +14,7 @@ export class PropertyService {
 	constructor(private http: Http, private config: ConfigService) {}
 
 	getProperties(): Observable<IProperty[]> {
-		var _url: string = this.config.getServiceUrl() + this.url;
+		var _url: string = this.config.getServiceUrl() + this.url + "?size=1000";
 	  return this.http.get(_url).map((response: Response) => {
 			var body = response.json();
 			// special handling for Spring Rest empty value
