@@ -1,0 +1,1 @@
+nohup npm start > web.log 2>&1 &
